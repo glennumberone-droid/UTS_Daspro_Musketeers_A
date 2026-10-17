@@ -4,11 +4,11 @@ var
     username, sandi : string; // login akun
     saldo : array[1..3] of longint;   // 1=makan, 2=kos, 3=tabungan
     nama  : array[1..3] of string;    // nama tiap pocket
-    i     : integer;                  // penghitung loop
+    i     : integer;                    // penghitung loop
     totalPengeluaran, jumlahTransaksi : longint;
-    nominal : longint;                       // angka uang yang diketik pengguna (pemasukan/pengeluaran)
-    menu, pilihPocket, percobaan : integer;  // pilihan menu, pilihan pocket & percobaan akun
-    berhasil : boolean;           // mendeteksi akun berhasil login atau tidak
+    totalPemasukan, sisaBudget, nominal : longint; // variabel untuk pemasukan dan alokasi
+    menu, pilihPocket, percobaan : integer;        // pilihan menu, pilihan pocket & percobaan akun
+    berhasil : boolean;                  // mendeteksi akun berhasil login atau tidak
 
 procedure Login;
     begin
@@ -53,45 +53,79 @@ begin
     if berhasil then
     begin
     repeat
+        clrscr;
+        writeln('=== MENU SMART BUDGET ===');
         writeln('1. Input Pemasukan');
         writeln('0. Keluar');
+        write('Pilihan Anda: ');
         readln(menu);
+        
         case menu of
             1 : begin
-            write('Masukkan Pemasukan Anda : ');
-            readln(nominal);
-                if nominal <= 0 then
-                writeln('Nominal harus lebih dari 0')
+                clrscr;
+                writeln('=== INPUT PEMASUKAN HARI INI ===');
+                write('Masukkan Total Pemasukan/Budget Hari Ini: ');
+                readln(totalPemasukan);
+
+                if totalPemasukan <= 0 then
+                begin
+                    writeln('Nominal budget harus lebih dari 0!');
+                end
                 else
                 begin
-                    if nominal < 1000000 then
+                    sisaBudget := totalPemasukan;
+                    writeln;
+                    writeln('Silakan alokasikan budget Anda ke masing-masing kebutuhan:');
+                    writeln('---------------------------------------------------------');
+
+                    // Mengisi alokasi untuk setiap kebutuhan satu per satu
+                    for i := 1 to 3 do
                     begin
-                    saldo[1] := saldo[1] + nominal * 45 div 100;
-                    saldo[2] := saldo[2] + nominal * 40 div 100;
-                    saldo[3] := saldo[3] + nominal * 15 div 100;
-                    end
-                    else if nominal < 3000000 then
-                    begin
-                    saldo[1] := saldo[1] + nominal * 35 div 100;
-                    saldo[2] := saldo[2] + nominal * 40 div 100;
-                    saldo[3] := saldo[3] + nominal * 25 div 100;
-                    end
-                    else
-                    begin
-                    saldo[1] := saldo[1] + nominal * 30 div 100;
-                    saldo[2] := saldo[2] + nominal * 35 div 100;
-                    saldo[3] := saldo[3] + nominal * 35 div 100;
+                        repeat
+                            writeln('Sisa budget yang belum dialokasikan: Rp ', sisaBudget);
+                            write('Alokasi untuk ', nama[i], ': Rp ');
+                            readln(nominal);
+
+                            if nominal < 0 then
+                                writeln('Nominal tidak boleh negatif!')
+                            else if nominal > sisaBudget then
+                                writeln('Nominal melebihi sisa budget yang ada! Masukkan ulang.')
+                            else
+                                break; // jika input valid, keluar dari loop repeat
+                        until false;
+
+                        // Tambahkan nominal ke saldo pocket terkait dan kurangi sisa budget
+                        saldo[i] := saldo[i] + nominal;
+                        sisaBudget := sisaBudget - nominal;
+                        writeln;
                     end;
 
-                    
-                    writeln('Saldo Makan    : ', saldo[1]);
-                    writeln('Saldo Uang Kos : ', saldo[2]);
-                    writeln('Saldo Tabungan : ', saldo[3]);
+                    // Tampilkan Hasil Pengalokasian Hari Ini
+                    clrscr;
+                    writeln('==========================================');
+                    writeln('     HASIL PENGALOKASIAN BUDGET HARI INI  ');
+                    writeln('==========================================');
+                    writeln('Total Pemasukan      : Rp ', totalPemasukan);
+                    writeln('------------------------------------------');
+                    writeln('1. Saldo Makan       : Rp ', saldo[1]);
+                    writeln('2. Saldo Uang Kos    : Rp ', saldo[2]);
+                    writeln('3. Saldo Tabungan    : Rp ', saldo[3]);
+                    writeln('------------------------------------------');
+                    writeln('Sisa Budget Bebas    : Rp ', sisaBudget);
+                    writeln('==========================================');
                 end;
-            writeln('Tekan Enter untuk kembali ke menu...');
-            readln;
-            end;
+
+                writeln;
+                writeln('Tekan Enter untuk kembali ke menu...');
+                readln;
+                end;
             0 : writeln('Terima kasih sudah memakai Smart Budget');
+            else
+                begin
+                    writeln('Pilihan tidak valid!');
+                    writeln('Tekan Enter untuk melanjutkan...');
+                    readln;
+                end;
         end;
     until menu = 0;
     end
